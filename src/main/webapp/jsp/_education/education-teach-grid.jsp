@@ -10,42 +10,25 @@
     <jsp:attribute name="script">
         <ax:script-lang key="ax.script" var="LANG" />
         <ax:script-lang key="ax.base" var="COL" />
-        <script type="text/javascript" src="<c:url value='/assets/js/view/_education/teach-grid.js' />"></script>
+        <script type="text/javascript" src="<c:url value='/assets/js/view/_education/education-teach-grid.js' />"></script>
     </jsp:attribute>
     <jsp:body>
 
         <ax:page-buttons></ax:page-buttons>
 
+
         <div role="page-header">
             <ax:form name="searchView0">
                 <ax:tbl clazz="ax-search-tbl" minWidth="500px">
                     <ax:tr>
-                        <ax:td label='ax.base.company.name' width="200px">
-                            <input type="text" name="companyNm" class="js-companyNm form-control" />
+                        <ax:td label='ax.base.company.name' width="300px">
+                            <input type="text" name="company" id="company" class="form-control" />
                         </ax:td>
-                        <ax:td label='ax.base.company.ceo' width="200px">
-                            <input type="text" name="ceo" class="js-ceo form-control" />
+                        <ax:td label='ax.base.company.ceo' width="300px">
+                            <input type="text" name="ceo" id="ceo" class="form-control" />
                         </ax:td>
-                        <ax:td label='ax.base.company.bizno' width="200px">
-                            <input type="text" name="bizno" class="js-bizno form-control" />
-                        </ax:td>
-                        <ax:td label='페이징 사용' width="200px">
-                            <input type="checkbox" class="js-isPage" />
-                        </ax:td>
-                    </ax:tr>
-                    <ax:tr>
-                        <ax:td label='ax.base.use.or.not' width="200px">
-                            <select name="useYn" class="js-useYn form-control">
-                                <option value="">전체</option>
-                                <option value="Y">사용</option>
-                                <option value="N">미사용</option>
-                            </select>
-                        </ax:td>
-                        <ax:td label='select(ax5ui 사용)' width="200px">
-                            <div data-ax5select class="js-useYn-ax5select"></div>
-                        </ax:td>
-                        <ax:td label='select(tag 사용)' width="200px">
-                            <ax:common-code groupCd="USE_YN" clazz="js-useYn-tag" emptyText="전체" />
+                        <ax:td label='ax.base.company.bizno' width="300px">
+                            <input type="text" name="bizno" id="bizno" class="form-control" />
                         </ax:td>
                     </ax:tr>
                 </ax:tbl>
