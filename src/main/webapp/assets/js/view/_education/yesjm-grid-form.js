@@ -1,12 +1,14 @@
 var fnObj = {};
 var ACTIONS = axboot.actionExtend(fnObj, {
     PAGE_SEARCH: function (caller, act, data) {
+        var paramObj = $.extend(caller.searchView.getData(), data, { pageSize: 4 });
         axboot.ajax({
             type: 'GET',
-            url: '/api/v1/_education/yesjmgridform',
-            data: caller.searchView.getData(),
+            url: '/api/v1/_education/yesjmgridform/pages',
+            data: paramObj,
             callback: function (res) {
                 caller.gridView01.setData(res);
+                caller.formView01.initView();
             },
             options: {
                 // axboot.ajax 함수에 2번째 인자는 필수가 아닙니다. ajax의 옵션을 전달하고자 할때 사용합니다.
@@ -19,13 +21,15 @@ var ACTIONS = axboot.actionExtend(fnObj, {
         return false;
     },
     PAGE_SAVE: function (caller, act, data) {
-        var item = caller.formView01.getData();
-
+        var item = [].concat(caller.formView01.getData());
         axboot.ajax({
             type: 'POST',
             url: '/api/v1/_education/yesjmgridform',
             data: JSON.stringify(item),
+            dataType: 'application/json',
+            contentType: 'application/json;charset=UTF-8',
             callback: function (res) {
+                console.log(item);
                 ACTIONS.dispatch(ACTIONS.PAGE_SEARCH);
                 axToast.push('저장 되었습니다');
             },
@@ -33,11 +37,14 @@ var ACTIONS = axboot.actionExtend(fnObj, {
     },
     ITEM_CLICK: function (caller, act, data) {},
     ITEM_ADD: function (caller, act, data) {
+        caller.formView01.initView();
         caller.gridView01.addRow();
     },
     ITEM_DEL: function (caller, act, data) {
         caller.gridView01.delRow('selected');
+        // fnObj.formView01.getData();
     },
+
     dispatch: function (caller, act, data) {
         var result = ACTIONS.exec(caller, act, data);
         if (result != 'error') {
@@ -70,6 +77,9 @@ fnObj.pageButtonView = axboot.viewExtend({
             save: function () {
                 ACTIONS.dispatch(ACTIONS.PAGE_SAVE);
             },
+            fn1: function () {
+                ACTIONS.dispatch(ACTIONS.ITEM_DEL);
+            },
             excel: function () {},
         });
     },
@@ -84,16 +94,24 @@ fnObj.searchView = axboot.viewExtend(axboot.searchView, {
         this.target = $(document['searchView0']);
         this.target.attr('onsubmit', 'return ACTIONS.dispatch(ACTIONS.PAGE_SEARCH);');
         this.filter = $('#filter');
+        this.companyNm = $('.js-companyNm');
+        this.ceo = $('.js-ceo');
+        this.bizno = $('.js-bizno');
         this.useYn = $('.js-useYn');
-        this.useYnTag = $('.js-useYn-tag');
+        // this.useYnTag = $('.js-useYn-tag');
     },
     getData: function () {
         return {
-            pageNumber: this.pageNumber,
-            pageSize: this.pageSize,
+            id: this.id,
+            pageType: this.pageType,
+            pageNumber: this.pageNumber || 0,
+            pageSize: this.pageSize || 0,
             filter: this.filter.val(),
+            companyNm: this.companyNm.val(),
+            ceo: this.ceo.val(),
+            bizno: this.bizno.val(),
             useYn: this.useYn.val(),
-            useYnTag: this.useYnTag.val(),
+            // useYnTag: this.useYnTag.val(),
         };
     },
 });
@@ -127,12 +145,12 @@ fnObj.gridView01 = axboot.viewExtend(axboot.gridView, {
         });
 
         axboot.buttonClick(this, 'data-grid-view-01-btn', {
-            add: function () {
-                ACTIONS.dispatch(ACTIONS.ITEM_ADD);
-            },
-            delete: function () {
-                ACTIONS.dispatch(ACTIONS.ITEM_DEL);
-            },
+            // add: function () {
+            //     ACTIONS.dispatch(ACTIONS.ITEM_ADD);
+            // },
+            // delete: function () {
+            //     ACTIONS.dispatch(ACTIONS.ITEM_DEL);
+            // },
         });
     },
     getData: function (_type) {
@@ -193,5 +211,15 @@ fnObj.formView01 = axboot.viewExtend(axboot.formView, {
         _this.model.setModel({}, _this.target);
 
         console.log(_this.model.get());
+
+        axboot.buttonClick(this, 'data-form-view-01-btn', {
+            add: function () {
+                ACTIONS.dispatch(ACTIONS.ITEM_ADD);
+                fnObj.gridView01.setData(this.item);
+            },
+            // delete: function () {
+            //     ACTIONS.dispatch(ACTIONS.ITEM_DEL);
+            // },
+        });
     },
 });

@@ -47,14 +47,24 @@
                             <h2><i class="cqc-list"></i>
                                 프로그램 목록 </h2>
                         </div>
-                        <div class="right">
-                            <button type="button" class="btn btn-default" data-grid-view-01-btn="add"><i class="cqc-circle-with-plus"></i> 추가</button>
-                            <button type="button" class="btn btn-default" data-grid-view-01-btn="delete"><i class="cqc-circle-with-plus"></i> 삭제</button>
-                        </div>
+                        <!-- <div class="right"> -->
+                            <!-- <button type="button" class="btn btn-default" data-grid-view-01-btn="add"><i class="cqc-circle-with-plus"></i> 추가</button> -->
+                            <!-- <button type="button" class="btn btn-default" data-grid-view-01-btn="delete"><i class="cqc-circle-with-plus"></i> 삭제</button> -->
+                        <!-- </div> -->
                     </div>
                     <div data-ax5grid="grid-view-01" data-fit-height-content="grid-view-01" style="height: 300px;"></div>
                 </div>
                 <div class="col-md-7">
+                    <div class="ax-button-group" data-fit-height-aside="form-view-01">
+                        <div class="left">
+                            <h2><i class="cqc-list"></i>
+                                상세정보 </h2>
+                        </div>
+                        <div class="right">
+                            <button type="button" class="btn btn-default" data-form-view-01-btn="add"><i class="cqc-circle-with-plus"></i> 추가</button>
+                            <!-- <button type="button" class="btn btn-default" data-grid-view-01-btn="delete"><i class="cqc-circle-with-plus"></i> 삭제</button> -->
+                        </div>
+                    </div>
                     <form name="form" class="js-form">
                         <div data-ax-tbl="" class="ax-form-tbl" style="">
                             <div data-ax-tr>

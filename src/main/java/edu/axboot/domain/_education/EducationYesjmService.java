@@ -1,6 +1,8 @@
 package edu.axboot.domain._education;
 
 import com.querydsl.core.BooleanBuilder;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +18,8 @@ import java.util.List;
 
 @Service
 public class EducationYesjmService extends BaseService<EducationYesjm, Long> {
+    private static final Logger logger = LoggerFactory.getLogger(EducationYesjmService.class);
+
     private EducationYesjmRepository educationYesjmRepository;
 
     @Inject
@@ -63,18 +67,16 @@ public class EducationYesjmService extends BaseService<EducationYesjm, Long> {
         return targets;
     }
 
-//    String type = requestParams.getString("type","");
-//
-//        if (type.equals("myBatis")){
-//        return this.getByMyBatis(requestParams);
-//    }else {
-//        return this.getByQueryDsl(requestParams);
-//    }
-    public List<EducationYesjm> getByQueryDsl(RequestParams<EducationYesjm> requestParams) {
+    public List<EducationYesjm> getListUsingQueryDsl(RequestParams<EducationYesjm> requestParams) {
         String companyNm = requestParams.getString("companyNm","");
         String ceo = requestParams.getString("ceo","");
         String bizno = requestParams.getString("bizno","");
         String useYn = requestParams.getString("useYn", "");
+
+        logger.info("회사명: " + companyNm);
+        logger.info("대표자: " + ceo);
+        logger.info("사업자벊: " + bizno);
+        logger.info("사용여부: " + useYn);
 
         BooleanBuilder builder = new BooleanBuilder();
 
@@ -202,6 +204,11 @@ public class EducationYesjmService extends BaseService<EducationYesjm, Long> {
 
     //MyBatis
     public List<EducationYesjm> getsByMyBatis(String companyNm, String ceo, String bizno, String useYn) {
+
+        if (!"".equals(useYn) && !"Y".equals(useYn) && !"N".equals(useYn)){
+            throw new RuntimeException("Y 아니면 N를 입력하세요"); //사용자가 exception을 인위적으로 잡아서 던짐
+        }
+
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("companyNm", companyNm);
         params.put("ceo", ceo);
@@ -232,11 +239,13 @@ public class EducationYesjmService extends BaseService<EducationYesjm, Long> {
     }
 
     public Page<EducationYesjm> getPage(RequestParams<EducationYesjm> requestParams) {
-        List<EducationYesjm> list = this.gets(requestParams);
+        List<EducationYesjm> list = this.getListUsingQueryDsl(requestParams);
         Pageable pageable = requestParams.getPageable();
         int start = (int)pageable.getOffset();
         int end = (start+pageable.getPageSize() > list.size() ? list.size() : (start+pageable.getPageSize()));
         Page<EducationYesjm> pages = new PageImpl<>(list.subList(start,end), pageable, list.size());
         return pages;
     }
+
+
 }

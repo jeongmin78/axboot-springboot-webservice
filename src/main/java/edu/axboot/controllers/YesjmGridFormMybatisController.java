@@ -5,6 +5,9 @@ import com.chequer.axboot.core.api.response.Responses;
 import com.chequer.axboot.core.controllers.BaseController;
 import edu.axboot.domain._education.EducationYesjm;
 import edu.axboot.domain._education.EducationYesjmService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,8 +15,9 @@ import javax.inject.Inject;
 import java.util.List;
 
 @Controller
-@RequestMapping(value = "/api/v1/_education/yesjmGridForm/myBatis")
+@RequestMapping(value = "/api/v1/_education/yesjmgridform/mybatis")
 public class YesjmGridFormMybatisController extends BaseController {
+    private static final Logger logger = LoggerFactory.getLogger(EducationYesjmService.class);
 
     @Inject
     private EducationYesjmService educationYesjmService;
@@ -24,8 +28,18 @@ public class YesjmGridFormMybatisController extends BaseController {
             @RequestParam(value = "ceo",required = false) String ceo,
             @RequestParam(value = "bizno",required = false) String bizno,
             @RequestParam(value = "useYn",required = false) String useYn) {
-        List<EducationYesjm> list = educationYesjmService.getsByMyBatis(companyNm,ceo,bizno,useYn);
-        return Responses.ListResponse.of(list);
+
+        try {
+            List<EducationYesjm> list = educationYesjmService.getsByMyBatis(companyNm, ceo, bizno, useYn);
+            return Responses.ListResponse.of(list);
+        }
+        catch (BadSqlGrammarException e){
+            logger.error("마이바티스 조회 오류. 쿼리 확인해 보세요");
+            return Responses.ListResponse.of(null);
+        }catch ( RuntimeException e){
+            logger.error(e.getMessage());
+            return Responses.ListResponse.of(null);
+        }
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = APPLICATION_JSON)
