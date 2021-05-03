@@ -3,6 +3,7 @@ package edu.axboot.domain;
 import com.chequer.axboot.core.domain.base.AXBootBaseService;
 import com.chequer.axboot.core.domain.base.AXBootJPAQueryDSLRepository;
 import edu.axboot.domain._education.QEducationYesjm;
+import edu.axboot.domain._education.book.QEducationBook;
 import edu.axboot.domain.code.QCommonCode;
 import edu.axboot.domain.file.QCommonFile;
 import edu.axboot.domain.program.QProgram;
@@ -28,6 +29,7 @@ public class BaseService<T, ID extends Serializable> extends AXBootBaseService<T
     protected QCommonFile qCommonFile = QCommonFile.commonFile;
     protected QEducationYesjm qEducationYesjm = QEducationYesjm.educationYesjm;
     protected QParentSample qParentSample = QParentSample.parentSample;
+    protected QEducationBook qEducationBook = QEducationBook.educationBook;
 
     protected AXBootJPAQueryDSLRepository<T, ID> repository;
 

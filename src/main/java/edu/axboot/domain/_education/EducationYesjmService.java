@@ -1,17 +1,17 @@
 package edu.axboot.domain._education;
 
+import com.chequer.axboot.core.parameter.RequestParams;
 import com.querydsl.core.BooleanBuilder;
-import org.slf4j.LoggerFactory;
+import edu.axboot.domain.BaseService;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import edu.axboot.domain.BaseService;
-import javax.inject.Inject;
-import com.chequer.axboot.core.parameter.RequestParams;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +28,7 @@ public class EducationYesjmService extends BaseService<EducationYesjm, Long> {
         this.educationYesjmRepository = educationYesjmRepository;
     }
 
-    @Inject
+//    @Inject
     private EducationYesjmMapper educationYesjmMapper;
 
     public List<EducationYesjm> gets(RequestParams<EducationYesjm> requestParams) {

@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -27,7 +26,7 @@ import java.util.List;
 @RequestMapping(value = "/api/v1/_education/yesjmgrid")
 public class YesjmGridController extends BaseController {
 
-    @Inject
+//    @Inject
     private EducationYesjmService educationYesjmService;
 
     @RequestMapping(value = "/pages", method = RequestMethod.GET, produces = APPLICATION_JSON)

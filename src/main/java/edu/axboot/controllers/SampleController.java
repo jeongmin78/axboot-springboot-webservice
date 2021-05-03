@@ -1,5 +1,8 @@
 package edu.axboot.controllers;
 
+import com.chequer.axboot.core.parameter.RequestParams;
+import com.wordnik.swagger.annotations.ApiImplicitParam;
+import com.wordnik.swagger.annotations.ApiImplicitParams;
 import edu.axboot.domain.sample.child.ChildSample;
 import edu.axboot.domain.sample.child.ChildSampleService;
 import edu.axboot.domain.sample.child.ChildSampleVO;
@@ -68,4 +71,16 @@ public class SampleController extends BaseController {
         childService.deleteByKeys(keys);
         return ok();
     }
+
+    @RequestMapping(value = "/parent/queryDsl", method = RequestMethod.GET, produces = APPLICATION_JSON)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "key", value = "key", dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "value", value = "value", dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "useYn", value = "useYn", dataType = "String", paramType = "query"),
+    })
+    public Responses.ListResponse parentList(RequestParams<ParentSample> requestParams) {
+        List<ParentSample> pages = this.parentService.get(requestParams);
+        return Responses.ListResponse.of(pages);
+    }
+
 }

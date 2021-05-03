@@ -1,11 +1,9 @@
 package edu.axboot.domain._education;
 
-import com.chequer.axboot.core.mybatis.MyBatisMapper;
-
 import java.util.HashMap;
 import java.util.List;
 
-public interface EducationYesjmMapper extends MyBatisMapper{
+public interface EducationYesjmMapper {//extends MyBatisMapper{
 
 //    List<EducationYesjm> getByMyBatis(EducationYesjm educationYesjm);
 

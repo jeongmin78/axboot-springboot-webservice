@@ -11,7 +11,6 @@ import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.inject.Inject;
 import java.util.List;
 
 @Controller
@@ -19,7 +18,7 @@ import java.util.List;
 public class YesjmGridFormMybatisController extends BaseController {
     private static final Logger logger = LoggerFactory.getLogger(EducationYesjmService.class);
 
-    @Inject
+//    @Inject
     private EducationYesjmService educationYesjmService;
 
     @RequestMapping(method = RequestMethod.GET, produces = APPLICATION_JSON)

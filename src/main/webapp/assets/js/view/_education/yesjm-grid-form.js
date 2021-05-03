@@ -42,9 +42,29 @@ var ACTIONS = axboot.actionExtend(fnObj, {
     },
     ITEM_DEL: function (caller, act, data) {
         caller.gridView01.delRow('selected');
-        // fnObj.formView01.getData();
     },
+    // ITEM_DEL: function (caller, act, data) {
+    //     // fnObj.formView01.getData();
 
+    //     // var paramObj = caller.gridView01.getData('deleted');
+    //     axboot.ajax({
+    //         type: 'DELETE',
+    //         url: '/api/v1/_education/yesjmgridform',
+    //         data: caller.gridView01.getData('deleted'),
+    //         contentType: 'application/json;charset=UTF-8',
+    //         callback: function (res) {
+    //             console.log(paramObj);
+    //             caller.gridView01.delRow('selected');
+    //             caller.formView01.initView();
+    //         },
+    //         options: {
+    //             // axboot.ajax 함수에 2번째 인자는 필수가 아닙니다. ajax의 옵션을 전달하고자 할때 사용합니다.
+    //             onError: function (err) {
+    //                 console.log(err);
+    //             },
+    //         },
+    //     });
+    // },
     dispatch: function (caller, act, data) {
         var result = ACTIONS.exec(caller, act, data);
         if (result != 'error') {
