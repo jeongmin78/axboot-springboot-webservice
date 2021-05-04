@@ -2,9 +2,10 @@ var fnObj = {};
 var ACTIONS = axboot.actionExtend(fnObj, {
     PAGE_SEARCH: function (caller, act, data) {
         var paramObj = $.extend(caller.searchView.getData(), data, { pageSize: 2 });
+
         axboot.ajax({
             type: 'GET',
-            url: '/api/v1/_education/yesjmgrid/pages',
+            url: '/api/v1/_education/yesjmgrid',
             data: paramObj,
             callback: function (res) {
                 caller.gridView01.setData(res);
@@ -16,8 +17,6 @@ var ACTIONS = axboot.actionExtend(fnObj, {
                 },
             },
         });
-
-        return false;
     },
     PAGE_SAVE: function (caller, act, data) {
         var saveList = [].concat(caller.gridView01.getData());
@@ -91,19 +90,24 @@ fnObj.pageButtonView = axboot.viewExtend({
 fnObj.searchView = axboot.viewExtend(axboot.searchView, {
     initView: function () {
         this.target = $(document['searchView0']);
-        this.target.attr('onsubmit', 'return ACTIONS.dispatch(ACTIONS.PAGE_SEARCH);');
-        this.filter = $('#filter');
-        this.companyNm = $('#companyNm');
-        this.ceo = $('#ceo');
-        this.bizno = $('#bizno');
-        this.useYn = $('.js-useYn');
+        this.target.attr('onsubmit', 'return false;');
+        this.target.on('keydown.search', 'input, .form-control', function (e) {
+            if (e.keyCode === 13) {
+                ACTIONS.dispatch(ACTIONS.PAGE_SEARCH);
+            }
+        });
+
+        this.companyNm = $('.js-companyNm');
+        this.ceo = $('.js-ceo');
+        this.bizno = $('.js-bizno');
+        this.useYn = $('.js-useYn').on('change', function () {
+            ACTIONS.dispatch(ACTIONS.PAGE_SEARCH);
+        });
     },
     getData: function () {
         return {
-            pageType: this.pageType,
             pageNumber: this.pageNumber || 0,
-            pageSize: this.pageSize || 0,
-            filter: this.filter.val(),
+            pageSize: this.pageSize || 50,
             companyNm: this.companyNm.val(),
             ceo: this.ceo.val(),
             bizno: this.bizno.val(),
@@ -133,30 +137,13 @@ fnObj.gridView01 = axboot.viewExtend(axboot.gridView, {
             multipleSelect: true,
             target: $('[data-ax5grid="grid-view-01"]'),
             columns: [
-                { key: 'companyNm', label: COL('company.name'), width: 300, align: 'left', editor: 'text' },
-                { key: 'ceo', label: COL('company.ceo'), width: 100, align: 'center', editor: 'text' },
-                { key: 'bizno', label: COL('company.bizno'), width: 100, align: 'center', editor: 'text' },
-                { key: 'tel', label: COL('company.tel'), width: 100, align: 'center', editor: 'text' },
-                { key: 'email', label: COL('company.email'), width: 100, align: 'center', editor: 'text' },
-                {
-                    key: 'useYn',
-                    label: COL('use.or.not'),
-                    width: 100,
-                    align: 'center',
-                    formatter: function () {
-                        var i = 0,
-                            len = fnObj.selectItems.length,
-                            value;
-                        for (; i < len; i++) {
-                            if (this.item.useYn === (value = fnObj.selectItems[i].value)) {
-                                break;
-                            }
-                        }
-                        return value === 'Y' ? '사용' : '미사용';
-                    },
-
-                    editor: { type: 'select', config: { columnsKeys: { optionValue: 'value', optionText: 'text' }, options: fnObj.selectItems } },
-                },
+                { key: 'companyNm', label: COL('company.name'), width: 250, align: 'left', editor: { type: 'text' } },
+                { key: 'ceo', label: COL('company.ceo'), width: 100, align: 'center', editor: { type: 'text' } },
+                { key: 'bizno', label: COL('company.bizno'), width: 100, align: 'center', formatter: 'bizno', editor: { type: 'text' } },
+                { key: 'tel', label: COL('company.tel'), width: 100, align: 'center', editor: { type: 'text' } },
+                { key: 'email', label: COL('company.email'), width: 100, align: 'center', editor: { type: 'text' } },
+                { key: 'useYn', label: COL('use.or.not'), width: 100, align: 'center', editor: 'useYn' },
+                { key: 'remark', label: '비고', width: 300, align: 'left', editor: { type: 'textarea' } },
             ],
             body: {
                 onClick: function () {
@@ -188,6 +175,6 @@ fnObj.gridView01 = axboot.viewExtend(axboot.gridView, {
         return list;
     },
     addRow: function () {
-        this.target.addRow({ __created__: true }, 'last');
+        this.target.addRow({ __created__: true, useYn: 'Y' }, 'last');
     },
 });

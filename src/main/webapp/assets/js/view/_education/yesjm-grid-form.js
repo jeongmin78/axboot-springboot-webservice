@@ -1,14 +1,14 @@
 var fnObj = {};
 var ACTIONS = axboot.actionExtend(fnObj, {
     PAGE_SEARCH: function (caller, act, data) {
-        var paramObj = $.extend(caller.searchView.getData(), data, { pageSize: 4 });
+        var paramObj = $.extend(caller.searchView.getData(), data);
         axboot.ajax({
             type: 'GET',
-            url: '/api/v1/_education/yesjmgridform/pages',
+            url: '/api/v1/_education/yesjmgridform',
             data: paramObj,
             callback: function (res) {
                 caller.gridView01.setData(res);
-                caller.formView01.initView();
+                caller.formView01.clear();
             },
             options: {
                 // axboot.ajax 함수에 2번째 인자는 필수가 아닙니다. ajax의 옵션을 전달하고자 할때 사용합니다.
@@ -17,54 +17,71 @@ var ACTIONS = axboot.actionExtend(fnObj, {
                 },
             },
         });
-
-        return false;
     },
     PAGE_SAVE: function (caller, act, data) {
-        var item = [].concat(caller.formView01.getData());
+        if (caller.formView01.validate()) {
+            var item = caller.formView01.getData();
+            if (!item.id) item.__created__ = true;
+            axboot.ajax({
+                type: 'POST',
+                url: '/api/v1/_education/yesjmgridform',
+                data: JSON.stringify(item),
+                callback: function (res) {
+                    ACTIONS.dispatch(ACTIONS.PAGE_SEARCH);
+                    axToast.push('저장 되었습니다');
+                },
+            });
+        }
+    },
+    ITEM_CLICK: function (caller, act, data) {
+        var id = (data || {}).id;
+        if (!id) {
+            axDialog.alert('id는 필수입니다.');
+            return false;
+        }
         axboot.ajax({
-            type: 'POST',
-            url: '/api/v1/_education/yesjmgridform',
-            data: JSON.stringify(item),
-            dataType: 'application/json',
-            contentType: 'application/json;charset=UTF-8',
+            type: 'GET',
+            url: '/api/v1/_education/yesjmgridform/' + id,
             callback: function (res) {
-                console.log(item);
-                ACTIONS.dispatch(ACTIONS.PAGE_SEARCH);
-                axToast.push('저장 되었습니다');
+                caller.formView01.setData(res);
             },
         });
     },
-    ITEM_CLICK: function (caller, act, data) {},
     ITEM_ADD: function (caller, act, data) {
         caller.formView01.initView();
         caller.gridView01.addRow();
     },
-    ITEM_DEL: function (caller, act, data) {
-        caller.gridView01.delRow('selected');
-    },
-    // ITEM_DEL: function (caller, act, data) {
-    //     // fnObj.formView01.getData();
+    PAGE_DELETE: function (caller, act, data) {
+        axDialog.confirm({ msg: '삭제하시겠습니까?' }, function () {
+            if (this.key == 'ok') {
+                var items = caller.gridView01.getData('selected');
+                if (!items.length) {
+                    axDialog.alert('삭제할 데이터가 없습니다.');
+                    return false;
+                }
+                var ids = items.map(function (value) {
+                    return value.id;
+                });
 
-    //     // var paramObj = caller.gridView01.getData('deleted');
-    //     axboot.ajax({
-    //         type: 'DELETE',
-    //         url: '/api/v1/_education/yesjmgridform',
-    //         data: caller.gridView01.getData('deleted'),
-    //         contentType: 'application/json;charset=UTF-8',
-    //         callback: function (res) {
-    //             console.log(paramObj);
-    //             caller.gridView01.delRow('selected');
-    //             caller.formView01.initView();
-    //         },
-    //         options: {
-    //             // axboot.ajax 함수에 2번째 인자는 필수가 아닙니다. ajax의 옵션을 전달하고자 할때 사용합니다.
-    //             onError: function (err) {
-    //                 console.log(err);
-    //             },
-    //         },
-    //     });
-    // },
+                axboot.ajax({
+                    type: 'DELETE',
+                    url: '/api/v1/_education/yesjmgridform?ids=' + ids.join(','),
+                    callback: function (res) {
+                        axToast.push('삭제 되었습니다');
+                        ACTIONS.dispatch(ACTIONS.PAGE_SEARCH);
+                    },
+                });
+            }
+        });
+    },
+    FORM_CLEAR: function (caller, act, data) {
+        axDialog.confirm({ msg: LANG('ax.script.form.clearconfirm') }, function () {
+            if (this.key == 'ok') {
+                caller.formView01.clear();
+                $('[data-ax-path="companyNm"]').focus();
+            }
+        });
+    },
     dispatch: function (caller, act, data) {
         var result = ACTIONS.exec(caller, act, data);
         if (result != 'error') {
@@ -98,7 +115,7 @@ fnObj.pageButtonView = axboot.viewExtend({
                 ACTIONS.dispatch(ACTIONS.PAGE_SAVE);
             },
             fn1: function () {
-                ACTIONS.dispatch(ACTIONS.ITEM_DEL);
+                ACTIONS.dispatch(ACTIONS.PAGE_DELETE);
             },
             excel: function () {},
         });
@@ -112,26 +129,24 @@ fnObj.pageButtonView = axboot.viewExtend({
 fnObj.searchView = axboot.viewExtend(axboot.searchView, {
     initView: function () {
         this.target = $(document['searchView0']);
-        this.target.attr('onsubmit', 'return ACTIONS.dispatch(ACTIONS.PAGE_SEARCH);');
-        this.filter = $('#filter');
-        this.companyNm = $('.js-companyNm');
-        this.ceo = $('.js-ceo');
-        this.bizno = $('.js-bizno');
-        this.useYn = $('.js-useYn');
-        // this.useYnTag = $('.js-useYn-tag');
+        this.target.attr('onsubmit', 'return false;');
+        this.target.on('keydown.search', 'input, .form-control', function (e) {
+            if (e.keyCode === 13) {
+                ACTIONS.dispatch(ACTIONS.PAGE_SEARCH);
+            }
+        });
+
+        this.useYn = $('.js-useYn').on('change', function () {
+            ACTIONS.dispatch(ACTIONS.PAGE_SEARCH);
+        });
+        this.filter = $('.js-filter');
     },
     getData: function () {
         return {
-            id: this.id,
-            pageType: this.pageType,
             pageNumber: this.pageNumber || 0,
-            pageSize: this.pageSize || 0,
-            filter: this.filter.val(),
-            companyNm: this.companyNm.val(),
-            ceo: this.ceo.val(),
-            bizno: this.bizno.val(),
+            pageSize: this.pageSize || 50,
             useYn: this.useYn.val(),
-            // useYnTag: this.useYnTag.val(),
+            filter: this.filter.val(),
         };
     },
 });
@@ -141,8 +156,6 @@ fnObj.searchView = axboot.viewExtend(axboot.searchView, {
  */
 fnObj.gridView01 = axboot.viewExtend(axboot.gridView, {
     initView: function () {
-        var _this = this;
-
         this.target = axboot.gridBuilder({
             onPageChange: function (pageNumber) {
                 ACTIONS.dispatch(ACTIONS.PAGE_SEARCH, { pageNumber: pageNumber });
@@ -155,39 +168,15 @@ fnObj.gridView01 = axboot.viewExtend(axboot.gridView, {
                 { key: 'companyNm', label: COL('company.name'), width: 120, align: 'left', editor: 'text' },
                 { key: 'ceo', label: COL('company.ceo'), width: 80, align: 'center', editor: 'text' },
                 { key: 'useYn', label: COL('use.or.not'), align: 'center', editor: 'text' },
+                { key: 'bizno', label: COL('company.bizno'), width: 100, formatter: 'bizno', align: 'center' },
             ],
             body: {
                 onClick: function () {
                     this.self.select(this.dindex, { selectedClear: true });
-                    fnObj.formView01.setData(this.item);
+                    ACTIONS.dispatch(ACTIONS.ITEM_CLICK, this.item);
                 },
             },
         });
-
-        axboot.buttonClick(this, 'data-grid-view-01-btn', {
-            // add: function () {
-            //     ACTIONS.dispatch(ACTIONS.ITEM_ADD);
-            // },
-            // delete: function () {
-            //     ACTIONS.dispatch(ACTIONS.ITEM_DEL);
-            // },
-        });
-    },
-    getData: function (_type) {
-        var list = [];
-        var _list = this.target.getList(_type);
-
-        if (_type == 'modified' || _type == 'deleted') {
-            list = ax5.util.filter(_list, function () {
-                return this.id;
-            });
-        } else {
-            list = _list;
-        }
-        return list;
-    },
-    addRow: function () {
-        this.target.addRow({ __created__: true }, 'last');
     },
 });
 
@@ -200,46 +189,60 @@ fnObj.formView01 = axboot.viewExtend(axboot.formView, {
         return { useYn: 'Y' };
     },
     getData: function () {
-        var item = {};
-        this.target.find('input,select').each(function (i, elem) {
-            //each : 찾은 객체를 for문 해라
-            // var $elem = $(elem)); //아래와 동일함
-            var $elem = $(this); //jquery 객체를 컨트롤할 거니까 $표시해주고
-            var name = $elem.data('axPath'); //jsp에서 받은 데이터 이름이랑 값을 item배열에 매핑
-            var value = $elem.val() || '';
-            item[name] = value;
-        });
+        var data = this.model.get();
+        return $.extend({}, data);
     },
-    setData: function (item) {
-        var value;
-        for (var prop in item) {
-            value = item[prop] || '';
-            $('[data-ax-path="' + prop + '"]').val(value);
+    setData: function (data) {
+        data = $.extend({}, data);
+        this.model.setModel(data);
+    },
+    validate: function () {
+        var item = this.model.get();
+
+        var rs = this.model.validate();
+        if (rs.error) {
+            axDialog.alert(LANG('ax.script.form.validate', rs.error[0].jquery.attr('title')), function () {
+                rs.error[0].jquery.focus();
+            });
+            return false;
         }
-        //그리드에서 선택한 항목의 데이터를 폼에 바인딩하기
-        console.log(item);
+
+        var pattern;
+        if (item.email) {
+            pattern = /^[A-Za-z0-9]([-_.]?[A-Za-z0-9])*@[A-Za-z0-9]([-_.]?[A-Za-z0-9])*\.(?:[A-Za-z0-9]{2,}?)$/i;
+            if (!pattern.test(item.email)) {
+                axDialog.alert('이메일 형식을 확인하세요.', function () {
+                    $('[data-ax-path="email"]').focus();
+                });
+                return false;
+            }
+        }
+
+        if (item.bizno && !(pattern = /^([0-9]{3})\-?([0-9]{2})\-?([0-9]{5})$/).test(item.bizno)) {
+            axDialog.alert('사업자번호 형식을 확인하세요.'),
+                function () {
+                    $('[data-ax-path="bizno"]').focus();
+                };
+            return false;
+        }
+        return true;
+    },
+    initEvent: function () {
+        axboot.buttonClick(this, 'data-form-view-01-btn', {
+            'form-clear': function () {
+                ACTIONS.dispatch(ACTIONS.FORM_CLEAR);
+            },
+        });
     },
     initView: function () {
-        //선언부. pageStart가 호출하면 초기화됨.
         var _this = this; // == fnObj.forView01
-        // 원래 this는 window를 가리키는데, 이 안에서 function을 정의하면 자기 스코프 최상위 객체 fnobj.forview01을 가리키는것이 된다.
-        // _this를 정의한 이유는 setTimeout 같은 새로운 프레임을 정의하게되면 this는 window로 바뀌기 때문에
-        // 항상 fnObj.formView01를 가리키도록 하기위해 _this를 정의해놓는것이다.
 
         _this.target = $('.js-form');
-        _this.model = new ax5.ui.binder();
-        _this.model.setModel({}, _this.target);
 
-        console.log(_this.model.get());
+        this.model = new ax5.ui.binder();
+        this.model.setModel(this.getDefaultData(), this.target);
+        this.modelFormatter = new axboot.modelFormatter(this.model);
 
-        axboot.buttonClick(this, 'data-form-view-01-btn', {
-            add: function () {
-                ACTIONS.dispatch(ACTIONS.ITEM_ADD);
-                fnObj.gridView01.setData(this.item);
-            },
-            // delete: function () {
-            //     ACTIONS.dispatch(ACTIONS.ITEM_DEL);
-            // },
-        });
+        this.initEvent();
     },
 });

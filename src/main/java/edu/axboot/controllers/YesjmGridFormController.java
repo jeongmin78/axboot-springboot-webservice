@@ -8,6 +8,7 @@ import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
 import edu.axboot.domain._education.EducationYesjm;
 import edu.axboot.domain._education.EducationYesjmService;
+import edu.axboot.utils.MiscUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -36,15 +37,13 @@ public class YesjmGridFormController extends BaseController {
         return Responses.PageResponse.of(pages);
     }
 
+// ---------------------------------------------------------------------------------------------
     //QueryDsl
     @RequestMapping(method = RequestMethod.GET, produces = APPLICATION_JSON)
-    public Responses.ListResponse list(
-            @RequestParam(value = "companyNm", required = false) String companyNm,
-            @RequestParam(value = "ceo",required = false) String ceo,
-            @RequestParam(value = "bizno",required = false) String bizno,
-            @RequestParam(value = "useYn",required = false) String useYn) {
-        List<EducationYesjm> list = educationYesjmService.gets(companyNm,ceo,bizno,useYn);
-        return Responses.ListResponse.of(list);
+    public Responses.PageResponse listUsingQueryDsl(RequestParams<EducationYesjm> requestParams) {
+        List<EducationYesjm> list = educationYesjmService.getListUsingQueryDsl(requestParams);
+        Page<EducationYesjm> page = MiscUtils.toPage(list, requestParams.getPageable());
+        return Responses.PageResponse.of(page);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = APPLICATION_JSON)
@@ -53,15 +52,15 @@ public class YesjmGridFormController extends BaseController {
         return entity;
     }
 
-    @RequestMapping(method = RequestMethod.POST, produces = APPLICATION_JSON)
+    @RequestMapping(method = {RequestMethod.POST}, produces = APPLICATION_JSON)
     public ApiResponse save(@RequestBody EducationYesjm request) {
         educationYesjmService.persist(request);
         return ok();
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = APPLICATION_JSON)
-    public ApiResponse delete(@PathVariable Long id){
-        educationYesjmService.remove(id);
+    @RequestMapping(method = RequestMethod.DELETE, produces = APPLICATION_JSON)
+    public ApiResponse delete(@RequestParam List<Long> ids){
+        educationYesjmService.deleteUsingQueryDsl(ids);
         return ok();
     }
 

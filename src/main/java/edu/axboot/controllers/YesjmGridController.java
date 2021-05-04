@@ -11,6 +11,7 @@ import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
 import edu.axboot.domain._education.EducationYesjm;
 import edu.axboot.domain._education.EducationYesjmService;
+import edu.axboot.utils.MiscUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,7 +30,7 @@ public class YesjmGridController extends BaseController {
 //    @Inject
     private EducationYesjmService educationYesjmService;
 
-    @RequestMapping(value = "/pages", method = RequestMethod.GET, produces = APPLICATION_JSON)
+    @RequestMapping(method = RequestMethod.GET, produces = APPLICATION_JSON)
     @ApiImplicitParams({
             @ApiImplicitParam(name="pageNumber", value="페이지번호(0부터)", required = true, dataType = "integer", paramType = "query", defaultValue = "0"),
             @ApiImplicitParam(name="pageSize", value="페이지크기", required = true, dataType = "integer", paramType = "query", defaultValue = "50"),
@@ -37,24 +38,26 @@ public class YesjmGridController extends BaseController {
             @ApiImplicitParam(name="ceo", value="대표자", dataType = "String", paramType = "query"),
             @ApiImplicitParam(name="bizno", value="사업자번호", dataType = "String", paramType = "query"),
             @ApiImplicitParam(name="useYn", value="사용여부", dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "filter", value = "검색어", dataType = "String", paramType = "query")
     })
-    public Responses.PageResponse pages(RequestParams<EducationYesjm> requestParams) {
-        Page<EducationYesjm> pages = educationYesjmService.getPage(requestParams);
-        return Responses.PageResponse.of(pages);
+    public Responses.PageResponse list(RequestParams<EducationYesjm> requestParams) {
+        List<EducationYesjm> list = educationYesjmService.getListUsingQueryDsl(requestParams);
+        Page<EducationYesjm> page = MiscUtils.toPage(list, requestParams.getPageable());
+        return Responses.PageResponse.of(page);
     }
 
     //JPA
-    @RequestMapping(method = RequestMethod.GET, produces = APPLICATION_JSON)
-    @ApiImplicitParams({
-            @ApiImplicitParam(name="companyNm", value="회사명", dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name="ceo", value="대표자", dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name="bizno", value="사업자번호", dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name="useYn", value="사용여부", dataType = "String", paramType = "query"),
-    })
-    public Responses.ListResponse list(RequestParams<EducationYesjm> requestParams) {
-        List<EducationYesjm> list = educationYesjmService.gets(requestParams);
-        return Responses.ListResponse.of(list);
-    }
+//    @RequestMapping(method = RequestMethod.GET, produces = APPLICATION_JSON)
+//    @ApiImplicitParams({
+//            @ApiImplicitParam(name="companyNm", value="회사명", dataType = "String", paramType = "query"),
+//            @ApiImplicitParam(name="ceo", value="대표자", dataType = "String", paramType = "query"),
+//            @ApiImplicitParam(name="bizno", value="사업자번호", dataType = "String", paramType = "query"),
+//            @ApiImplicitParam(name="useYn", value="사용여부", dataType = "String", paramType = "query"),
+//    })
+//    public Responses.ListResponse list(RequestParams<EducationYesjm> requestParams) {
+//        List<EducationYesjm> list = educationYesjmService.gets(requestParams);
+//        return Responses.ListResponse.of(list);
+//    }
 
     @RequestMapping(method = {RequestMethod.PUT}, produces = APPLICATION_JSON)
     public ApiResponse save(@RequestBody List<EducationYesjm> request) {

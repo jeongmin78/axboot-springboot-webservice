@@ -68,15 +68,17 @@ public class EducationYesjmService extends BaseService<EducationYesjm, Long> {
     }
 
     public List<EducationYesjm> getListUsingQueryDsl(RequestParams<EducationYesjm> requestParams) {
-        String companyNm = requestParams.getString("companyNm","");
-        String ceo = requestParams.getString("ceo","");
-        String bizno = requestParams.getString("bizno","");
+        String companyNm = requestParams.getString("companyNm", "");
+        String ceo = requestParams.getString("ceo", "");
+        String bizno = requestParams.getString("bizno", "");
         String useYn = requestParams.getString("useYn", "");
+        String filter = requestParams.getFilter();
 
-        logger.info("회사명: " + companyNm);
-        logger.info("대표자: " + ceo);
-        logger.info("사업자벊: " + bizno);
-        logger.info("사용여부: " + useYn);
+        logger.info("회사명 : " + companyNm);
+        logger.info("대표자 : " + ceo);
+        logger.info("사업자번호 : " + bizno);
+        logger.info("사용여부 : " + useYn);
+        logger.info("검색 : " + filter);
 
         BooleanBuilder builder = new BooleanBuilder();
 
@@ -84,13 +86,20 @@ public class EducationYesjmService extends BaseService<EducationYesjm, Long> {
             builder.and(qEducationYesjm.companyNm.contains(companyNm));
         }
         if (isNotEmpty(ceo)) {
-            builder.and(qEducationYesjm.ceo.contains(ceo));
+            builder.and(qEducationYesjm.ceo.like("%" + ceo +"%"));
         }
-        if (isNotEmpty(bizno)){
-            builder.and(qEducationYesjm.bizno.contains(bizno));
+        if (isNotEmpty(bizno)) {
+            builder.and(qEducationYesjm.bizno.like(bizno + "%"));
         }
-        if (isNotEmpty(useYn)){
+        if (isNotEmpty(useYn)) {
             builder.and(qEducationYesjm.useYn.eq(useYn));
+        }
+
+        if (isNotEmpty(filter)) {
+            builder.and(qEducationYesjm.companyNm.contains(filter)
+                    .or(qEducationYesjm.ceo.like("%" + filter + "%"))
+                    .or(qEducationYesjm.bizno.like(filter + "%"))
+            );
         }
 
         List<EducationYesjm> educationYesjmList = select()
@@ -172,8 +181,14 @@ public class EducationYesjmService extends BaseService<EducationYesjm, Long> {
     }
 
     public EducationYesjm getByOne(Long id) {
-        EducationYesjm educationYesjm = select().from(qEducationYesjm).where(qEducationYesjm.id.eq(id)).fetchOne();
-        return educationYesjm;
+        BooleanBuilder builder = new BooleanBuilder();
+        builder.and(qEducationYesjm.id.eq(id));
+
+        EducationYesjm entity = select()
+                .from(qEducationYesjm)
+                .where(builder)
+                .fetchOne();
+        return entity;
     }
 
     @Transactional
@@ -247,5 +262,17 @@ public class EducationYesjmService extends BaseService<EducationYesjm, Long> {
         return pages;
     }
 
+//------------------------------------------------------------------------------
 
+    @Transactional
+    public void deleteUsingQueryDsl(List<Long> ids) {
+        for(Long id: ids){
+            deleteUsingQueryDsl(id);
+        }
+    }
+
+    @Transactional
+    public void deleteUsingQueryDsl(Long id) {
+        delete(qEducationYesjm).where(qEducationYesjm.id.eq(id)).execute();
+    }
 }

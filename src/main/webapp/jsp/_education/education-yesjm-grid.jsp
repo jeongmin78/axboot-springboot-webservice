@@ -21,23 +21,18 @@
             <ax:form name="searchView0">
                 <ax:tbl clazz="ax-search-tbl" minWidth="500px">
                     <ax:tr>
-                        <ax:td label='ax.base.company.name' width="300px">
-                            <input type="text" name="companyNm" id="companyNm" class="form-control" />
+                        <ax:td label='ax.base.company.name' width="200px">
+                            <input type="text" name="companyNm" class="js-companyNm form-control" />
                         </ax:td>
-                        <ax:td label='ax.base.company.ceo' width="300px">
-                            <input type="text" name="ceo" id="ceo" class="form-control" />
+                        <ax:td label='ax.base.company.ceo' width="200px">
+                            <input type="text" name="ceo" class="js-ceo form-control" />
                         </ax:td>
-                        <ax:td label='ax.base.company.bizno' width="300px">
-                            <input type="text" name="bizno" id="bizno" class="form-control" />
+                        <ax:td label='ax.base.company.bizno' width="200px">
+                            <input type="text" name="bizno" class="js-bizno form-control" />
                         </ax:td>
-                        <ax:td label='ax.base.use.or.not' width="300px">
-                            <select class="form-control js-useYn" >
-                                <option value="">전체</option>
-                                <option value="Y">사용</option>
-                                <option value="N">미사용</option>
-                            </select>
+                        <ax:td label='ax.base.use.or.not' width="360px">
+                            <ax:common-code groupCd="USE_YN" clazz="js-useYn" emptyText="전체" />
                         </ax:td>
-                        
                     </ax:tr>
                 </ax:tbl>
             </ax:form>

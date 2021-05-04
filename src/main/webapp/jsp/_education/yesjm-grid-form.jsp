@@ -20,17 +20,11 @@
             <ax:form name="searchView0">
                 <ax:tbl clazz="ax-search-tbl" minWidth="500px">
                     <ax:tr>
-                        <ax:td label='ax.base.company.name' width="200px">
-                            <input type="text" name="companyNm" class="js-companyNm form-control" />
-                        </ax:td>
-                        <ax:td label='ax.base.company.ceo' width="200px">
-                            <input type="text" name="ceo" class="js-ceo form-control" />
-                        </ax:td>
-                        <ax:td label='ax.base.company.bizno' width="200px">
-                            <input type="text" name="bizno" class="js-bizno form-control" />
-                        </ax:td>
                         <ax:td label='ax.base.use.or.not' width="200px">
                             <ax:common-code groupCd="USE_YN" clazz="js-useYn" emptyText="전체" />
+                        </ax:td>
+                        <ax:td label='ax.admin.search' width="300px">
+                            <input type="text" name="filter" class="js-filter form-control" placeholder="회사명 / 대표자 / 사업자번호" />
                         </ax:td>
                     </ax:tr>
                 </ax:tbl>
@@ -61,21 +55,22 @@
                                 상세정보 </h2>
                         </div>
                         <div class="right">
-                            <button type="button" class="btn btn-default" data-form-view-01-btn="add"><i class="cqc-circle-with-plus"></i> 추가</button>
-                            <!-- <button type="button" class="btn btn-default" data-grid-view-01-btn="delete"><i class="cqc-circle-with-plus"></i> 삭제</button> -->
+                            <button type="button" class="btn btn-default" data-form-view-01-btn="form-clear">
+                                <i class="cqc-erase"></i> <ax:lang id="ax.admin.clear"/>
+                            </button>
                         </div>
                     </div>
                     <form name="form" class="js-form">
                         <div data-ax-tbl="" class="ax-form-tbl" style="">
                             <div data-ax-tr>
                                 <div data-ax-td style="width:50%">
-                                    <div data-ax-td-label style="width:150px">ID</div>
+                                    <div data-ax-td-label style="width:120px">ID</div>
                                     <div data-ax-td-wrap>
                                         <input type="text" data-ax-path="id" class="form-control" value="" readonly="readonly">
                                     </div>
                                 </div>
                                 <div data-ax-td style="width:50%">
-                                    <div data-ax-td-label style="width:150px">사용여부</div>
+                                    <div data-ax-td-label style="width:120px">사용여부</div>
                                     <div data-ax-td-wrap>
                                         <ax:common-code groupCd="USE_YN" dataPath="useYn" />
                                     </div>
@@ -83,57 +78,72 @@
                             </div>
                             <div data-ax-tr>
                                 <div data-ax-td style="width:50%">
-                                    <div data-ax-td-label style="width:150px">사업자명</div>
+                                    <div data-ax-td-label style="width:120px;">회사명</div>
                                     <div data-ax-td-wrap>
-                                        <input type="text" data-ax-path="companyNm" class="form-control" value="">
+                                        <input type="text" name="companyNm" data-ax-path="companyNm" title="회사명" class="form-control" data-ax-validate="required" />
                                     </div>
                                 </div>
                                 <div data-ax-td style="width:50%">
-                                    <div data-ax-td-label style="width:150px">대표자</div>
+                                    <div data-ax-td-label style="width:120px;">대표자</div>
                                     <div data-ax-td-wrap>
-                                        <input type="text" data-ax-path="ceo" class="form-control" value="">
-                                    </div>
-                                </div>
-                            </div>
-                            <div data-ax-tr>
-                                <div data-ax-td style="width:50%">
-                                    <div data-ax-td-label style="width:150px">사업자번호</div>
-                                    <div data-ax-td-wrap>
-                                        <input type="text" data-ax-path="bizno" class="form-control" value="">
-                                    </div>
-                                </div>
-                                <div data-ax-td style="width:50%">
-                                    <div data-ax-td-label style="width:150px">전화번호</div>
-                                    <div data-ax-td-wrap>
-                                        <input type="text" data-ax-path="tel" class="form-control" value="">
+                                        <input type="text" name="ceo" data-ax-path="ceo" class="form-control" />
                                     </div>
                                 </div>
                             </div>
+
                             <div data-ax-tr>
                                 <div data-ax-td style="width:50%">
-                                    <div data-ax-td-label style="width:150px">우편번호</div>
+                                    <div data-ax-td-label style="width:120px;">사업자번호</div>
                                     <div data-ax-td-wrap>
-                                        <input type="text" data-ax-path="zip" class="form-control" value="" >
+                                        <input type="text" name="bizno" data-ax-path="bizno" title="사업자번호" data-ax5formatter="bizno" class="form-control" placeholder="000-00-00000" />
                                     </div>
                                 </div>
                                 <div data-ax-td style="width:50%">
-                                    <div data-ax-td-label style="width:150px">주소</div>
+                                    <div data-ax-td-label style="width:120px;">전화번호</div>
                                     <div data-ax-td-wrap>
-                                        <input type="text" data-ax-path="address" class="form-control" value="">
+                                        <input type="text" name="tel" data-ax-path="tel" class="form-control" />
                                     </div>
                                 </div>
                             </div>
+
                             <div data-ax-tr>
                                 <div data-ax-td style="width:50%">
-                                    <div data-ax-td-label style="width:150px">주소 상세</div>
+                                    <div data-ax-td-label style="width:120px;">이메일</div>
                                     <div data-ax-td-wrap>
-                                        <input type="text" data-ax-path="addressDetail" class="form-control" value="" >
+                                        <input type="text" name="email" data-ax-path="email" class="form-control" placeholder="x@x.xx" />
                                     </div>
                                 </div>
                                 <div data-ax-td style="width:50%">
-                                    <div data-ax-td-label style="width:150px">비고</div>
+                                    <div data-ax-td-label style="width:120px;">우편번호</div>
                                     <div data-ax-td-wrap>
-                                        <input type="text" data-ax-path="remark" class="form-control" value="">
+                                        <input type="text" name="zip" data-ax-path="zip" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div data-ax-tr>
+                                <div data-ax-td style="width:100%">
+                                    <div data-ax-td-label style="width:120px;">주소</div>
+                                    <div data-ax-td-wrap>
+                                        <input type="text" name="address" data-ax-path="address" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div data-ax-tr>
+                                <div data-ax-td style="width:100%">
+                                    <div data-ax-td-label style="width:120px;">상세 주소</div>
+                                    <div data-ax-td-wrap>
+                                        <input type="text" name="addressDetail" data-ax-path="addressDetail" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div data-ax-tr>
+                                <div data-ax-td style="width:100%">
+                                    <div data-ax-td-label style="width:120px;">비고</div>
+                                    <div data-ax-td-wrap>
+                                        <textarea name="remark" data-ax-path="remark" rows="5" class="form-control"></textarea>
                                     </div>
                                 </div>
                             </div>
