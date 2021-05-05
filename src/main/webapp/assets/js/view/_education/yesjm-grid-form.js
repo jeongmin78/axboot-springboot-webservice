@@ -65,7 +65,7 @@ var ACTIONS = axboot.actionExtend(fnObj, {
 
                 axboot.ajax({
                     type: 'DELETE',
-                    url: '/api/v1/_education/yesjmgridform?ids=' + ids.join(','),
+                    url: '/api/v1/_education/yesjmgridform/' + ids.join(','),
                     callback: function (res) {
                         axToast.push('삭제 되었습니다');
                         ACTIONS.dispatch(ACTIONS.PAGE_SEARCH);

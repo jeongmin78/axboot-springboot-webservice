@@ -40,7 +40,7 @@ public class YesjmGridFormController extends BaseController {
 // ---------------------------------------------------------------------------------------------
     //QueryDsl
     @RequestMapping(method = RequestMethod.GET, produces = APPLICATION_JSON)
-    public Responses.PageResponse listUsingQueryDsl(RequestParams<EducationYesjm> requestParams) {
+    public Responses.PageResponse list(RequestParams<EducationYesjm> requestParams) {
         List<EducationYesjm> list = educationYesjmService.getListUsingQueryDsl(requestParams);
         Page<EducationYesjm> page = MiscUtils.toPage(list, requestParams.getPageable());
         return Responses.PageResponse.of(page);
@@ -48,20 +48,19 @@ public class YesjmGridFormController extends BaseController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = APPLICATION_JSON)
     public EducationYesjm view(@PathVariable Long id){
-        EducationYesjm entity = educationYesjmService.getByOne(id);
+        EducationYesjm entity = educationYesjmService.getByOneUsingQueryDsl(id);
         return entity;
     }
 
     @RequestMapping(method = {RequestMethod.POST}, produces = APPLICATION_JSON)
     public ApiResponse save(@RequestBody EducationYesjm request) {
-        educationYesjmService.persist(request);
+        educationYesjmService.persistUsingQueryDsl(request);
         return ok();
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, produces = APPLICATION_JSON)
-    public ApiResponse delete(@RequestParam List<Long> ids){
+    @RequestMapping(value = "/{ids}", method = RequestMethod.DELETE, produces = APPLICATION_JSON)
+    public ApiResponse delete(@PathVariable(name = "ids") List<Long> ids){
         educationYesjmService.deleteUsingQueryDsl(ids);
         return ok();
     }
-
 }

@@ -28,8 +28,18 @@ public class EducationYesjmService extends BaseService<EducationYesjm, Long> {
         this.educationYesjmRepository = educationYesjmRepository;
     }
 
+    public Page<EducationYesjm> getPage(RequestParams<EducationYesjm> requestParams) {
+        List<EducationYesjm> list = this.getListUsingQueryDsl(requestParams);
+        Pageable pageable = requestParams.getPageable();
+        int start = (int)pageable.getOffset();
+        int end = (start+pageable.getPageSize() > list.size() ? list.size() : (start+pageable.getPageSize()));
+        Page<EducationYesjm> pages = new PageImpl<>(list.subList(start,end), pageable, list.size());
+        return pages;
+    }
+
 //    @Inject
     private EducationYesjmMapper educationYesjmMapper;
+
 
     public List<EducationYesjm> gets(RequestParams<EducationYesjm> requestParams) {
         List<EducationYesjm> list = this.getFilter(findAll(), requestParams.getString("companyNm",""),1);
@@ -65,6 +75,115 @@ public class EducationYesjmService extends BaseService<EducationYesjm, Long> {
             }
         }
         return targets;
+    }
+
+
+    //MyBatis
+    public List<EducationYesjm> getsByMyBatis(String companyNm, String ceo, String bizno, String useYn) {
+
+        if (!"".equals(useYn) && !"Y".equals(useYn) && !"N".equals(useYn)){
+            throw new RuntimeException("Y 아니면 N를 입력하세요"); //사용자가 exception을 인위적으로 잡아서 던짐
+        }
+
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("companyNm", companyNm);
+        params.put("ceo", ceo);
+        params.put("bizno", bizno);
+        params.put("useYn", useYn);
+
+        List<EducationYesjm> list = educationYesjmMapper.select(params);
+
+        return list;
+    }
+
+    public EducationYesjm getOneByMyBatis(Long id) {
+        return educationYesjmMapper.selectOne(id);
+    }
+
+    @Transactional
+    public void saveByMybatis(EducationYesjm request) {
+        if (request.getId() == null || request.getId() == 0) {
+            educationYesjmMapper.insert(request);
+        }else {
+            educationYesjmMapper.update(request);
+        }
+    }
+
+    @Transactional
+    public void deleteByMybatis(Long id) {
+        educationYesjmMapper.delete(id);
+    }
+
+
+//  QueryDSL ------------------------------------------------------------------------------
+
+    // YesjmGrid
+    public List<EducationYesjm> gets(String companyNm, String ceo, String bizno, String useYn) {
+    BooleanBuilder builder = new BooleanBuilder();
+
+    if (isNotEmpty(companyNm)) {
+        builder.and(qEducationYesjm.companyNm.like("%" + companyNm + "%"));
+    }
+    if (isNotEmpty(ceo)) {
+        builder.and(qEducationYesjm.ceo.contains(ceo));
+    }
+    if (isNotEmpty(bizno)){
+        builder.and(qEducationYesjm.bizno.contains(bizno));
+    }
+    if (isNotEmpty(useYn)){
+        builder.and(qEducationYesjm.useYn.eq(useYn));
+    }
+
+    List<EducationYesjm> educationYesjmList = select()
+            .from(qEducationYesjm)
+            .where(builder)
+            .orderBy(qEducationYesjm.companyNm.asc())
+            .fetch();
+
+    return educationYesjmList;
+}
+
+    public EducationYesjm getByOne(RequestParams<EducationYesjm> requestParams) {
+        Long id = requestParams.getLong("id");
+        BooleanBuilder builder = new BooleanBuilder();
+        builder.and(qEducationYesjm.id.eq(id));
+        EducationYesjm educationYesjm = select().from(qEducationYesjm).where(builder).fetchOne();
+        return educationYesjm;
+    }
+
+    @Transactional
+    public void saveByQueryDsl(List<EducationYesjm> request) {
+        for (EducationYesjm educationYesjm :request) {
+            if (educationYesjm.isCreated()) {
+                save(educationYesjm);
+            } else if (educationYesjm.isModified()) {
+                update(qEducationYesjm)
+                        .set(qEducationYesjm.companyNm, educationYesjm.getCompanyNm())
+                        .set(qEducationYesjm.ceo, educationYesjm.getCeo())
+                        .set(qEducationYesjm.bizno, educationYesjm.getBizno())
+                        .set(qEducationYesjm.tel, educationYesjm.getTel())
+                        .set(qEducationYesjm.email, educationYesjm.getEmail())
+                        .set(qEducationYesjm.useYn, educationYesjm.getUseYn())
+                        .where(qEducationYesjm.id.eq(educationYesjm.getId()))
+                        .execute();
+            } else if (educationYesjm.isDeleted()){
+                delete(qEducationYesjm)
+                        .where(qEducationYesjm.id.eq(educationYesjm.getId()))
+                        .execute();
+            }
+        }
+    }
+
+    // YesjmGridForm
+    public EducationYesjm getByOneUsingQueryDsl(Long id) {
+        BooleanBuilder builder = new BooleanBuilder();
+        builder.and(qEducationYesjm.id.eq(id));
+
+        EducationYesjm entity = select()
+                .from(qEducationYesjm)
+                .where(builder)
+                .fetchOne();
+        return entity;
     }
 
     public List<EducationYesjm> getListUsingQueryDsl(RequestParams<EducationYesjm> requestParams) {
@@ -111,88 +230,8 @@ public class EducationYesjmService extends BaseService<EducationYesjm, Long> {
         return educationYesjmList;
     }
 
-    public EducationYesjm getOneByQueryDsl(RequestParams<EducationYesjm> requestParams) {
-        Long id = requestParams.getLong("id");
-        BooleanBuilder builder = new BooleanBuilder();
-        builder.and(qEducationYesjm.id.eq(id));
-        EducationYesjm educationYesjm = select().from(qEducationYesjm).where(builder).fetchOne();
-        return educationYesjm;
-    }
-
     @Transactional
-    public void saveByQueryDsl(List<EducationYesjm> request) {
-        for (EducationYesjm educationYesjm :request) {
-            if (educationYesjm.isCreated()) {
-                save(educationYesjm);
-            } else if (educationYesjm.isModified()) {
-                update(qEducationYesjm)
-                        .set(qEducationYesjm.companyNm, educationYesjm.getCompanyNm())
-                        .set(qEducationYesjm.ceo, educationYesjm.getCeo())
-                        .set(qEducationYesjm.bizno, educationYesjm.getBizno())
-                        .set(qEducationYesjm.tel, educationYesjm.getTel())
-                        .set(qEducationYesjm.email, educationYesjm.getEmail())
-                        .set(qEducationYesjm.useYn, educationYesjm.getUseYn())
-                        .where(qEducationYesjm.id.eq(educationYesjm.getId()))
-                        .execute();
-            } else if (educationYesjm.isDeleted()){
-                delete(qEducationYesjm)
-                        .where(qEducationYesjm.id.eq(educationYesjm.getId()))
-                        .execute();
-            }
-        }
-    }
-
-/*    public List<EducationYesjm> getByMyBatis(RequestParams<EducationYesjm> requestParams) {
-        EducationYesjm educationYesjm = new EducationYesjm();
-        educationYesjm.setCompanyNm(requestParams.getString("companyNm", ""));
-        educationYesjm.setCeo(requestParams.getString("ceo",""));
-        educationYesjm.setBizno(requestParams.getString("bizno",""));
-        educationYesjm.setUseYn(requestParams.getString("useYn",""));
-
-        List<EducationYesjm> educationYesjmList = this.educationYesjmMapper.getByMyBatis(educationYesjm);
-
-        return educationYesjmList;
-    }*/
-
-    //QueryDsl
-    public List<EducationYesjm> gets(String companyNm, String ceo, String bizno, String useYn) {
-        BooleanBuilder builder = new BooleanBuilder();
-
-        if (isNotEmpty(companyNm)) {
-            builder.and(qEducationYesjm.companyNm.like("%" + companyNm + "%"));
-        }
-        if (isNotEmpty(ceo)) {
-            builder.and(qEducationYesjm.ceo.contains(ceo));
-        }
-        if (isNotEmpty(bizno)){
-            builder.and(qEducationYesjm.bizno.contains(bizno));
-        }
-        if (isNotEmpty(useYn)){
-            builder.and(qEducationYesjm.useYn.eq(useYn));
-        }
-
-        List<EducationYesjm> educationYesjmList = select()
-                .from(qEducationYesjm)
-                .where(builder)
-                .orderBy(qEducationYesjm.companyNm.asc())
-                .fetch();
-
-        return educationYesjmList;
-    }
-
-    public EducationYesjm getByOne(Long id) {
-        BooleanBuilder builder = new BooleanBuilder();
-        builder.and(qEducationYesjm.id.eq(id));
-
-        EducationYesjm entity = select()
-                .from(qEducationYesjm)
-                .where(builder)
-                .fetchOne();
-        return entity;
-    }
-
-    @Transactional
-    public void persist(EducationYesjm request) {
+    public void persistUsingQueryDsl(EducationYesjm request) {
         if (request.getId() == null || request.getId() == 0) {
             save(request);
         }else {
@@ -211,58 +250,6 @@ public class EducationYesjmService extends BaseService<EducationYesjm, Long> {
                     .execute();
         }
     }
-
-    @Transactional
-    public void remove(Long id) {
-        delete(qEducationYesjm).where(qEducationYesjm.id.eq(id)).execute();
-    }
-
-    //MyBatis
-    public List<EducationYesjm> getsByMyBatis(String companyNm, String ceo, String bizno, String useYn) {
-
-        if (!"".equals(useYn) && !"Y".equals(useYn) && !"N".equals(useYn)){
-            throw new RuntimeException("Y 아니면 N를 입력하세요"); //사용자가 exception을 인위적으로 잡아서 던짐
-        }
-
-        HashMap<String, String> params = new HashMap<String, String>();
-        params.put("companyNm", companyNm);
-        params.put("ceo", ceo);
-        params.put("bizno", bizno);
-        params.put("useYn", useYn);
-
-        List<EducationYesjm> list = educationYesjmMapper.select(params);
-
-        return list;
-    }
-
-    public EducationYesjm getOneByMyBatis(Long id) {
-        return educationYesjmMapper.selectOne(id);
-    }
-
-    @Transactional
-    public void saveByMybatis(EducationYesjm request) {
-        if (request.getId() == null || request.getId() == 0) {
-            educationYesjmMapper.insert(request);
-        }else {
-            educationYesjmMapper.update(request);
-        }
-    }
-
-    @Transactional
-    public void deleteByMybatis(Long id) {
-        educationYesjmMapper.delete(id);
-    }
-
-    public Page<EducationYesjm> getPage(RequestParams<EducationYesjm> requestParams) {
-        List<EducationYesjm> list = this.getListUsingQueryDsl(requestParams);
-        Pageable pageable = requestParams.getPageable();
-        int start = (int)pageable.getOffset();
-        int end = (start+pageable.getPageSize() > list.size() ? list.size() : (start+pageable.getPageSize()));
-        Page<EducationYesjm> pages = new PageImpl<>(list.subList(start,end), pageable, list.size());
-        return pages;
-    }
-
-//------------------------------------------------------------------------------
 
     @Transactional
     public void deleteUsingQueryDsl(List<Long> ids) {

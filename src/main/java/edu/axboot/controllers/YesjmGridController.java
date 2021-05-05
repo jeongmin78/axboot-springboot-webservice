@@ -46,19 +46,6 @@ public class YesjmGridController extends BaseController {
         return Responses.PageResponse.of(page);
     }
 
-    //JPA
-//    @RequestMapping(method = RequestMethod.GET, produces = APPLICATION_JSON)
-//    @ApiImplicitParams({
-//            @ApiImplicitParam(name="companyNm", value="회사명", dataType = "String", paramType = "query"),
-//            @ApiImplicitParam(name="ceo", value="대표자", dataType = "String", paramType = "query"),
-//            @ApiImplicitParam(name="bizno", value="사업자번호", dataType = "String", paramType = "query"),
-//            @ApiImplicitParam(name="useYn", value="사용여부", dataType = "String", paramType = "query"),
-//    })
-//    public Responses.ListResponse list(RequestParams<EducationYesjm> requestParams) {
-//        List<EducationYesjm> list = educationYesjmService.gets(requestParams);
-//        return Responses.ListResponse.of(list);
-//    }
-
     @RequestMapping(method = {RequestMethod.PUT}, produces = APPLICATION_JSON)
     public ApiResponse save(@RequestBody List<EducationYesjm> request) {
         educationYesjmService.save(request);
@@ -82,7 +69,7 @@ public class YesjmGridController extends BaseController {
             @ApiImplicitParam(name="id", value="ID", required = true, dataType = "Long", paramType = "query"),
     })
     public EducationYesjm selectOne(RequestParams<EducationYesjm> requestParams) {
-        EducationYesjm educationYesjm = this.educationYesjmService.getOneByQueryDsl(requestParams);
+        EducationYesjm educationYesjm = this.educationYesjmService.getByOne(requestParams);
         return educationYesjm;
     }
 

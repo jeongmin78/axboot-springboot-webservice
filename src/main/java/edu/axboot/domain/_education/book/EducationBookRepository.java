@@ -8,6 +8,5 @@ import java.util.List;
 
 public interface EducationBookRepository extends JpaRepository<EducationBook, Long> {
 
-//    @Query("SELECT p FROM EDUCATION_YESJM p ORDER BY p.id DESC")
     List<EducationYesjm> findBy();
 }
