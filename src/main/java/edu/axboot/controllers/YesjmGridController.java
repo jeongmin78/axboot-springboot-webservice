@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -27,24 +28,25 @@ import java.util.List;
 @RequestMapping(value = "/api/v1/_education/yesjmgrid")
 public class YesjmGridController extends BaseController {
 
-//    @Inject
+    @Inject
     private EducationYesjmService educationYesjmService;
 
-    @RequestMapping(method = RequestMethod.GET, produces = APPLICATION_JSON)
     @ApiImplicitParams({
-            @ApiImplicitParam(name="pageNumber", value="페이지번호(0부터)", required = true, dataType = "integer", paramType = "query", defaultValue = "0"),
-            @ApiImplicitParam(name="pageSize", value="페이지크기", required = true, dataType = "integer", paramType = "query", defaultValue = "50"),
-            @ApiImplicitParam(name="companyNm", value="회사명", dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name="ceo", value="대표자", dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name="bizno", value="사업자번호", dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name="useYn", value="사용여부", dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "pageNumber", value = "페이지번호(0부터시작)", required = true, dataType = "integer", paramType = "query", defaultValue = "0"),
+            @ApiImplicitParam(name = "pageSize", value = "페이지크기", required = true, dataType = "integer", paramType = "query", defaultValue = "50"),
+            @ApiImplicitParam(name = "companyNm", value = "회사명", dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "ceo", value = "대표자", dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "bizno", value = "사업자번호", dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "useYn", value = "사용유무", dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "filter", value = "검색어", dataType = "String", paramType = "query")
     })
+    @RequestMapping(method = RequestMethod.GET, produces = APPLICATION_JSON)
     public Responses.PageResponse list(RequestParams<EducationYesjm> requestParams) {
         List<EducationYesjm> list = educationYesjmService.getListUsingQueryDsl(requestParams);
         Page<EducationYesjm> page = MiscUtils.toPage(list, requestParams.getPageable());
         return Responses.PageResponse.of(page);
     }
+
 
     @RequestMapping(method = {RequestMethod.PUT}, produces = APPLICATION_JSON)
     public ApiResponse save(@RequestBody List<EducationYesjm> request) {

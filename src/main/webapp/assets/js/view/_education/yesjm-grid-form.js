@@ -54,18 +54,20 @@ var ACTIONS = axboot.actionExtend(fnObj, {
     PAGE_DELETE: function (caller, act, data) {
         axDialog.confirm({ msg: '삭제하시겠습니까?' }, function () {
             if (this.key == 'ok') {
+                //ok버튼 누르면
                 var items = caller.gridView01.getData('selected');
                 if (!items.length) {
                     axDialog.alert('삭제할 데이터가 없습니다.');
                     return false;
                 }
                 var ids = items.map(function (value) {
+                    //배열로 만들기
                     return value.id;
                 });
 
                 axboot.ajax({
                     type: 'DELETE',
-                    url: '/api/v1/_education/yesjmgridform/' + ids.join(','),
+                    url: '/api/v1/_education/yesjmgridform/' + ids.join(','), //join이 없어도 동작하는데 왜 사용하지?
                     callback: function (res) {
                         axToast.push('삭제 되었습니다');
                         ACTIONS.dispatch(ACTIONS.PAGE_SEARCH);
@@ -78,7 +80,7 @@ var ACTIONS = axboot.actionExtend(fnObj, {
         axDialog.confirm({ msg: LANG('ax.script.form.clearconfirm') }, function () {
             if (this.key == 'ok') {
                 caller.formView01.clear();
-                $('[data-ax-path="companyNm"]').focus();
+                $('[data-ax-path="companyNm"]').focus(); //companyNm에 커서
             }
         });
     },
@@ -132,11 +134,13 @@ fnObj.searchView = axboot.viewExtend(axboot.searchView, {
         this.target.attr('onsubmit', 'return false;');
         this.target.on('keydown.search', 'input, .form-control', function (e) {
             if (e.keyCode === 13) {
+                //searchview의 항목들에서 enter누르면 검색
                 ACTIONS.dispatch(ACTIONS.PAGE_SEARCH);
             }
         });
 
         this.useYn = $('.js-useYn').on('change', function () {
+            //change 이벤트는 요소의 값이 변경될 때 사용됨.
             ACTIONS.dispatch(ACTIONS.PAGE_SEARCH);
         });
         this.filter = $('.js-filter');
@@ -172,7 +176,10 @@ fnObj.gridView01 = axboot.viewExtend(axboot.gridView, {
             ],
             body: {
                 onClick: function () {
-                    this.self.select(this.dindex, { selectedClear: true });
+                    //grid.body.onClick.call({self: this, dindex:0, item: this.list[0]}); 내부적으로는 이렇게 생긴거임....?
+                    this.self.select(this.dindex, { selectedClear: true }); //????? this.self라는 변수가 그리드 인스턴스
+                    //별도의 정보를 클릭할때 파라미터를 던진다.
+                    //가공된 this.... 아우 이해안된다..........
                     ACTIONS.dispatch(ACTIONS.ITEM_CLICK, this.item);
                 },
             },
@@ -189,12 +196,16 @@ fnObj.formView01 = axboot.viewExtend(axboot.formView, {
         return { useYn: 'Y' };
     },
     getData: function () {
-        var data = this.model.get();
+        // this.model.get(); //formView 영역의 모든 데이터를 json형식으로 가져오는건가?
+        var data = this.modelFormatter.getClearData(this.model.get()); //formatter양식 지우고 기본 데이터 형식으로 가져옴
         return $.extend({}, data);
     },
     setData: function (data) {
+        if (typeof data === 'undefined') data = this.getDefaultData();
         data = $.extend({}, data);
+
         this.model.setModel(data);
+        this.modelFormatter.formatting();
     },
     validate: function () {
         var item = this.model.get();
@@ -209,6 +220,7 @@ fnObj.formView01 = axboot.viewExtend(axboot.formView, {
 
         var pattern;
         if (item.email) {
+            //a~9사이로 시작해서 -_.포함가능하고a~9사이 다음 '@'만나고 a~9사이 '.' 만난다음 a~9사이 2개 이상
             pattern = /^[A-Za-z0-9]([-_.]?[A-Za-z0-9])*@[A-Za-z0-9]([-_.]?[A-Za-z0-9])*\.(?:[A-Za-z0-9]{2,}?)$/i;
             if (!pattern.test(item.email)) {
                 axDialog.alert('이메일 형식을 확인하세요.', function () {
@@ -217,7 +229,7 @@ fnObj.formView01 = axboot.viewExtend(axboot.formView, {
                 return false;
             }
         }
-
+        //0~9사이 3개 '-' 0~9사이 2개 '-' 0~9사이 5개
         if (item.bizno && !(pattern = /^([0-9]{3})\-?([0-9]{2})\-?([0-9]{5})$/).test(item.bizno)) {
             axDialog.alert('사업자번호 형식을 확인하세요.'),
                 function () {
@@ -235,7 +247,7 @@ fnObj.formView01 = axboot.viewExtend(axboot.formView, {
         });
     },
     initView: function () {
-        var _this = this; // == fnObj.forView01
+        var _this = this; // this = fnObj.forView01
 
         _this.target = $('.js-form');
 

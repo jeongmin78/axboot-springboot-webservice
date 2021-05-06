@@ -1,7 +1,7 @@
 var fnObj = {};
 var ACTIONS = axboot.actionExtend(fnObj, {
     PAGE_SEARCH: function (caller, act, data) {
-        var paramObj = $.extend(caller.searchView.getData(), data, { pageSize: 2 });
+        var paramObj = $.extend(caller.searchView.getData(), data);
 
         axboot.ajax({
             type: 'GET',

@@ -205,7 +205,7 @@ public class EducationYesjmService extends BaseService<EducationYesjm, Long> {
             builder.and(qEducationYesjm.companyNm.contains(companyNm));
         }
         if (isNotEmpty(ceo)) {
-            builder.and(qEducationYesjm.ceo.like("%" + ceo +"%"));
+            builder.and(qEducationYesjm.ceo.like("%" + ceo + "%"));
         }
         if (isNotEmpty(bizno)) {
             builder.and(qEducationYesjm.bizno.like(bizno + "%"));
@@ -221,13 +221,13 @@ public class EducationYesjmService extends BaseService<EducationYesjm, Long> {
             );
         }
 
-        List<EducationYesjm> educationYesjmList = select()
+        List<EducationYesjm> list = select()
                 .from(qEducationYesjm)
                 .where(builder)
                 .orderBy(qEducationYesjm.companyNm.asc())
                 .fetch();
 
-        return educationYesjmList;
+        return list;
     }
 
     @Transactional
