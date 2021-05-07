@@ -32,3 +32,12 @@ VALUES (303, 'SYSTEM_MANAGER', '실습용 그리드 모달', '{"ko":"실습용 �
 -- 메뉴 권한
 INSERT INTO AUTH_GROUP_MAP_M (GRP_AUTH_CD , MENU_ID, SCH_AH, SAV_AH, DEL_AH, CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY )
 VALUES ('S0001', '303',  'Y', 'Y', 'Y', sysdate(), 'system', sysdate(), 'system');
+
+INSERT INTO PROG_M (PROG_CD, PROG_NM, PROG_PH, TARGET, AUTH_CHECK, SCH_AH, SAV_AH)
+VALUES ('yesjm-excel', '실습용 엑셀', '/jsp/_education/yesjm-excel.jsp', '_self', 'Y', 'Y', 'Y');
+-- 메뉴 생성
+INSERT INTO MENU_M (MENU_ID, MENU_GRP_CD, MENU_NM, MULTI_LANGUAGE, PARENT_ID, LEVEL, SORT, PROG_CD, CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY )
+VALUES (310, 'SYSTEM_MANAGER', '실습용 엑셀', '{"ko":"실습용 엑셀","en":"실습용 엑셀"}',  300, 1, 10, 'yesjm-excel', sysdate(), 'system', sysdate(), 'system');
+-- 메뉴 권한
+INSERT INTO AUTH_GROUP_MAP_M (GRP_AUTH_CD , MENU_ID, SCH_AH, SAV_AH, CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY )
+VALUES ('S0001', '310',  'Y', 'Y', sysdate(), 'system', sysdate(), 'system');

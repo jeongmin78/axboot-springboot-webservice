@@ -1,26 +1,49 @@
 package edu.axboot.domain._education;
 
+import com.chequer.axboot.core.api.ApiException;
 import com.chequer.axboot.core.parameter.RequestParams;
+import com.chequer.axboot.core.utils.CoreUtils;
 import com.querydsl.core.BooleanBuilder;
 import edu.axboot.domain.BaseService;
+import edu.axboot.domain.file.CommonFile;
+import edu.axboot.domain.file.CommonFileService;
+import edu.axboot.domain.file.UploadParameters;
+import edu.axboot.fileupload.FileUploadService;
+import edu.axboot.fileupload.UploadFile;
+import org.apache.commons.io.FileUtils;
+import org.jxls.reader.ReaderBuilder;
+import org.jxls.reader.ReaderConfig;
+import org.jxls.reader.XLSReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.inject.Inject;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class EducationYesjmService extends BaseService<EducationYesjm, Long> {
     private static final Logger logger = LoggerFactory.getLogger(EducationYesjmService.class);
 
     private EducationYesjmRepository educationYesjmRepository;
+
+    @Autowired
+    private CommonFileService commonFileService;
+
+    @Autowired
+    private FileUploadService fileuploadService;
 
     @Inject
     public EducationYesjmService(EducationYesjmRepository educationYesjmRepository) {
@@ -231,26 +254,35 @@ public class EducationYesjmService extends BaseService<EducationYesjm, Long> {
     }
 
     @Transactional
-    public void persistUsingQueryDsl(EducationYesjm request) {
+    public void persistUsingQueryDsl(EducationYesjm request){
         if (request.getId() == null || request.getId() == 0) {
-            save(request);
-        }else {
-            update(qEducationYesjm)
-                    .where(qEducationYesjm.id.eq(request.getId()))
-                    .set(qEducationYesjm.companyNm, request.getCompanyNm())
-                    .set(qEducationYesjm.ceo, request.getCeo())
-                    .set(qEducationYesjm.bizno, request.getBizno())
-                    .set(qEducationYesjm.tel, request.getTel())
-                    .set(qEducationYesjm.zip, request.getZip())
-                    .set(qEducationYesjm.address, request.getAddress())
-                    .set(qEducationYesjm.addressDetail, request.getAddressDetail())
-                    .set(qEducationYesjm.email, request.getEmail())
-                    .set(qEducationYesjm.remark, request.getRemark())
-                    .set(qEducationYesjm.useYn, request.getUseYn())
+            if (request.getFileIdList().size() > 0) {
+                request.setAttachId(CoreUtils.getUUID().replaceAll("-",""));
+                List<CommonFile> commonFileList = new ArrayList<>();
+                for(Long fileId: request.getFileIdList()){
+                    CommonFile commonFile = commonFileService.findOne(fileId);
+                    commonFile.setTargetId(request.getAttachId());
+                    commonFileList.add(commonFile);
+                }
+                request.setFileList(commonFileList);
+            }
+            this.educationYesjmRepository.save(request);
+        } else {
+            update(qEducationTeach)
+                    .set(qEducationTeach.companyNm, request.getCompanyNm())
+                    .set(qEducationTeach.ceo, request.getCeo())
+                    .set(qEducationTeach.bizno, request.getBizno())
+                    .set(qEducationTeach.tel, request.getTel())
+                    .set(qEducationTeach.zip, request.getZip())
+                    .set(qEducationTeach.address, request.getAddress())
+                    .set(qEducationTeach.addressDetail, request.getAddressDetail())
+                    .set(qEducationTeach.email, request.getEmail())
+                    .set(qEducationTeach.remark, request.getRemark())
+                    .set(qEducationTeach.useYn, request.getUseYn())
+                    .where(qEducationTeach.id.eq(request.getId()))
                     .execute();
         }
     }
-
     @Transactional
     public void deleteUsingQueryDsl(List<Long> ids) {
         for(Long id: ids){
@@ -261,5 +293,56 @@ public class EducationYesjmService extends BaseService<EducationYesjm, Long> {
     @Transactional
     public void deleteUsingQueryDsl(Long id) {
         delete(qEducationYesjm).where(qEducationYesjm.id.eq(id)).execute();
+    }
+
+//  Excel ------------------------------------------------------------------------------
+
+    @Transactional
+    public String saveDataByExcel(UploadFile uploadFile) throws Exception {
+        String resultMsg = "";
+
+        ReaderConfig.getInstance().setSkipErrors(true);
+
+        XLSReader mainReader = ReaderBuilder.buildFromXML(new ClassPathResource("/excel/education_upload.xml").getInputStream());
+        List<EducationYesjm> entities = new ArrayList();
+
+        Map beans = new HashMap();
+        beans.put("educationList", entities);
+
+        String excelFile = uploadFile.getSavePath();
+        File file = new File(excelFile);
+        mainReader.read(FileUtils.openInputStream(file), beans);
+
+        int rowIndex = 1;
+
+        for (EducationYesjm entity : entities) {
+            if (StringUtils.isEmpty(entity.getCompanyNm())) {
+                resultMsg = String.format("%d 번째 줄의 회사명이 비어있습니다.", rowIndex);
+                throw new ApiException(String.format("%d 번째 줄의 회사명이 비어있습니다.", rowIndex));
+            }
+            if (StringUtils.isEmpty(entity.getCeo())) {
+                resultMsg = String.format("%d 번째 줄의 대표자가 비어있습니다.", rowIndex);
+                throw new ApiException(String.format("%d 번째 줄의 대표자가 비어있습니다.", rowIndex));
+            }
+            if (StringUtils.isEmpty(entity.getUseYn())) {
+                resultMsg = String.format("%d 번째 줄의 사용여부가 비어있습니다.", rowIndex);
+                throw new ApiException(String.format("%d 번째 줄의 사용여부가 비어있습니다.", rowIndex));
+            }
+
+            save(entity);
+            rowIndex++;
+        }
+
+        return resultMsg;
+    }
+
+    @Transactional
+    public String uploadFileByExcel(MultipartFile multipartFile) throws Exception {
+        UploadParameters uploadParameters = new UploadParameters();
+        uploadParameters.setMultipartFile(multipartFile);
+        UploadFile uploadFile = fileuploadService.addCommonFile(uploadParameters);
+        String result = this.saveDataByExcel(uploadFile);
+        fileuploadService.deleteFile(uploadFile.getSavePath());
+        return result;
     }
 }
